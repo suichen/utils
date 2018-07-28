@@ -1,0 +1,12 @@
+当采用Nginx做负载均衡时，为解决session一致性的问题方法总结。
+
+1. 负载均衡算法采用 ip hash, 相同的ip总是进入一台服器。
+    缺点：
+        单点故障
+
+2. tomcat 配置为session复制
+    缺点：
+        传输耗时，必须能被序列化
+
+3. 使用redis做session共享
+    对服务器进行请求时，先去redis集群获取session。

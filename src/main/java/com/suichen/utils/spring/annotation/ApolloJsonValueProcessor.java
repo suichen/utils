@@ -18,7 +18,7 @@ public class ApolloJsonValueProcessor extends ApolloProcessor implements BeanFac
 
     @Override
     protected void processMethod(Object bean, String beanName, Method method) {
-
+        return;
     }
 
     @Override

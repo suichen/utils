@@ -1,0 +1,150 @@
+spring 事务笔记：
+
+事务核心类：TransactionAspectSupport
+
+//该方法为模板方法
+protected Object invokeWithTransaction(Method method, Class<?> targetClass, final InvocationCallback invocation) {
+
+//.....
+    //创建事务
+    TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
+    //...
+    try {
+
+    } catch(Throwable ex) {
+        completeTransactionAfterThrowing(txInfo, ex); //事务回滚
+        throw ex;
+    }
+
+}
+
+
+protected TransactionInfo createTransactionIfNecessary(
+			PlatformTransactionManager tm, TransactionAttribute txAttr, final String joinpointIdentification) {
+
+
+    //.....
+
+    status = tm.getTransaction(txAttr);
+
+    //....
+}
+
+
+
+public final TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+
+Object transaction = doGetTransaction(); //获取目标方法事务的上下文信息
+
+if (isExistingTransaction(transaction)) {//如果目标方法中存在事务上下文环境
+	// Existing transaction found -> check propagation behavior to find out how to behave.
+	return handleExistingTransaction(definition, transaction, debugEnabled);
+}
+
+//目标方法不存在上下文事务环境
+//....
+
+
+}
+
+
+
+
+@Transactional
+public void shopping1() {
+
+    //操作数据库
+
+    updateService.updateOrder1();
+
+    //操作数据库
+}
+
+
+@Transactional
+public void shopping2() {
+
+    //操作数据库
+
+    try {
+        updateService.updateOrder2();
+    }catch(Throwable ex) {
+
+    }
+
+    //操作数据库
+}
+
+class UpdateService {
+    @Transactional((propagation = Propagation.NESTED)
+    public void updateOrder1() {
+        //操作数据库
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateOrder2() {
+        //操作数据库
+    }
+}
+
+
+updateOrderX()方法执行的上下文中不存在事务上下文：
+    1. REQUIRED   创建新事务
+    2. REQUIRES_NEW     创建新事务
+    3. NESTED           创建新事务
+
+
+updateOrderX()方法执行的上下文中存在事务上下文：
+    1. REQUIRED   使用当前事务
+    2. REQUIRES_NEW     挂起当前事务，创建新事务
+    3. NESTED           创建保存点，使用当前事务
+
+
+
+    当在内层事务，即updateOrderX()中抛出异常时：
+        不管updateOrderX采用的是 REQUIRES_NEW，还是NESTED
+
+        如果在shoppingX()方法不对updateOrderX()异常进行捕获，都会造成外层事务的回滚。
+
+        如果对updateOrderX()进行了异常捕获，只会造成updateOrderX()回滚，外层的shoppingX()不会进行回滚。
+
+        在这样情况下 REQUIRES_NEW，NESTED没有区别
+
+
+        原因是：在方法 invokeWithTransaction(...) 中， catch块中，对内层事务即updateOrderX进行
+                回滚后，会继续对外抛出异常(throw ex), 如果对在updateOrderX()方法不对抛出的该异常进行处理，
+                外层的 shoppingX()执行过程中 即invokeWithTransaction(...) 会捕获到该异常，会进入catch块中
+                进行外层事务的回滚。
+
+
+    当外层事务，即shoppingX()抛出异常时：
+        当采用事务隔离级别是NESTED，内层事务，外层事务都会进行回滚。
+        当采用的事务隔离级别是REQUIRES_NEW时，只会回滚外层的事务，内层的事务不会回滚。
+
+
+        原因是：
+            NESTED采用的保存点，事务回滚是根据事务日志。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
