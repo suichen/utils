@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.suichen.utils.grpc";
+option java_outer_classname = "TccEventProto";
+
+import "common.proto";
+
+service TccEventService {
+    rpc OnConnected(GrpcServiceConfig) returns (stream GrpcTccCoordinateCommand) {
+
+    }
+
+    rpc participate(GrpcTccParticipatedEvent) returns (GrpcAck) {
+
+    }
+
+    rpc OnTccTransactionStarted(GrpcTccTransactionStartedEvent) returns (GrpcAck) {
+
+    }
+
+    rpc OnTccTransactionEnded(GrpcTccTransactionEndedEvent) returns (GrpcAck) {
+
+    }
+
+    rpc OnTccCoordinated(GrpcTccCoordinatedEvent) returns (GrpcAck) {
+
+    }
+
+    rpc OnDisConnected(GrpcServiceConfig) returns (GrpcAck) {}
+
+}
+
+message GrpcTccCoordinateCommand {
+    string globalTxId = 1;
+    string localTxId = 2;
+    string parentTxId = 3;
+    string serviceName = 4;
+    string method = 5;
+}
+
+message GrpcTccParticipatedEvent {
+    int64 timestamp = 1;
+    string globalTxId = 2;
+    string localTxId = 3;
+    string parentTxId = 4;
+    string serviceName = 5;
+    string instanceId = 6;
+    string confirmMethod = 7;
+    string cancelMethod = 8;
+    string status = 9;
+}
+
+message GrpcTccTransactionStartedEvent {
+    int64 timestamp = 1;
+    string globalTxId = 2;
+    string localTxId = 3;
+    string parentTxId = 4;
+    string serviceName = 5;
+    string instanceId = 6;
+}
+
+message GrpcTccCoordinatedEvent {
+    int64 timestamp = 1;
+    string globalTxId = 2;
+    string localTxId = 3;
+    string parentTxId = 4;
+    string serviceName = 5;
+    string instanceId = 6;
+    string status = 7;
+}
+
+message GrpcTccTransactionEndedEvent {
+    int64 timestamp = 1;
+    string globalTxId = 2;
+    string localTxId = 3;
+    string parentTxId = 4;
+    string serviceName = 5;
+    string instanceId = 6;
+    string status = 7;
+}

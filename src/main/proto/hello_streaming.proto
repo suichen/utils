@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.suichen.utils.grpc";
+option java_outer_classname = "HelloStreamingProto";
+option objc_class_prefix = "HLWS";
+
+package grpc;
+
+import "common.proto";
+
+service StreamingGreeter {
+    rpc SayHelloStreaming(stream HelloRequest) returns (stream HelloResponse) {}
+}
