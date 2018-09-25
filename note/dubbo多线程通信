@@ -1,0 +1,28 @@
+Dubbo 的多线程通信原理
+
+    Consumer端可能同时有多个线程调用Provider的服务，此时Provider会启动多个线程来分别处理这些并发调用，
+    处理完后将数据返回。在这种多线程环境中，Dubbo是如何做到Consumer Thread A 线程不会拿到 Consumer Thread B
+    线程的请求结果的？
+
+
+    在客户端 获取 DubboInvoker对象：
+        将请求信息封装在一个Request对象中，Request对象会包括一个自增的id；
+        然后将Request存到一个ConcurrentHashMap中（key=id, value=DefaultFuture）;
+        将request写入Channel，Consumer Thread执行 DefaultFuture.get()方法等待返回结果；
+
+        服务提供方创建多线程处理用户请求，并将返回结果封装在Response中（包括Request的id）；
+        将response写入Channel，消费方从Channel中收到数据后，解析出id，从Map中解析出DefaultFuture;
+        唤醒Consumer Thread，返回结果；
+
+        DefaultFuture也会启动一个定时程序，检查timeout内，结果是否返回，如果未返回，将
+        DefaultFuture从Map中移除，并抛出超时异常。
+
+
+    对于consumer端而言，服务器会为每一个请求创建一个线程，因为rpc操作是一个慢动作；
+    为了节省资源，当线程发送rpc请求后，需要让当前线程释放资源、进入等待队列；
+    当获取到返回结果以后，再唤醒这个线程。
+
+    RPC的请求过程为：
+        每一个RPC请求都有一个唯一的id，RPC请求的时候，会将id也发送给provider；
+        provider处理完后将此id和返回结果一同返回给consumer；
+        consumer收到返回信息以后解析出id，然后从FUTURES中找到相对应的DefaultFuture.
