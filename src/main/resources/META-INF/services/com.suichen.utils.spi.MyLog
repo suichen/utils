@@ -1,0 +1,3 @@
+#第一个为事件值
+logA=com.suichen.utils.spi.impl.LogA
+logB=com.suichen.utils.spi.impl.LogB
