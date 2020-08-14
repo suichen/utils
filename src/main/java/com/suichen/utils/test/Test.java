@@ -7,6 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+class SubClass extends SuperClass
+{
+    public String name = "SubClass";
+}
+
+class SuperClass
+{
+    public String name = "SuperClass";
+}
+
+
+
 public class Test {
 
     public static void main(String[] args) {
@@ -37,5 +49,10 @@ public class Test {
         Map<Integer, Person> ans = BeanUtils.mapByKey("age", people);
 
         System.out.println();
+
+        //类初始化的顺序
+        SuperClass clz = new SubClass();
+        //你觉得这里输出什么?
+        System.out.println(clz.name);
     }
 }

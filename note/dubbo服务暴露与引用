@@ -1,0 +1,14 @@
+暴露服务
+    1. 只暴露服务端口
+        在没有注册中心，直接暴露提供者的情况下，ServiceConfig解析出URL的格式为：
+        dubbo://service-hosts/com.foo.FooService?version=1.0.0
+
+        基于扩展点自适应机制，通过URL的dubbo://协议头识别，直接调用DubboProtocol的export()方法，打开服务端口。
+    2. 向注册中心暴露服务
+        在有注册中心，需要注册提供者地址的情况下，ServiceConfig解析出URL格式为：
+        registry://registry-host/com.alibaba.dubbo.registry.RegistryService?export=URL.encode("dubbo://service-host/com.foo.FooService?version=1.0.0")
+        基于扩展点自适应机制，通过URL的registry://协议头，就会调用RegistryPotocol的export()方法，将export()参数
+        中的提供者URL，先注册到注册中心
+
+        再重新传给Protocol扩展点进行暴露: dubbo://service-host/com.alibaba.foo.FooService?version=1.0.0,
+        然后基于扩展点自适应机制，通过提供者URL的dubbo://协议头，就会调用DubboProtocol的

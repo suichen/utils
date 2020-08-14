@@ -142,6 +142,18 @@ package com.suichen.utils.dubbo;
 //QosProtocolWrapper 第二次执行的是 return protocol.export(invoker)  protocol is DubboProtocol
 
 
+//Exchanges类，这个类是通讯的入口，在DubboProtocol.createServer和initClient方法里分别用到Exchanges的bind和connect方法
+
+//客户端Exchanges和Transports
+
+//客户端的Invoker。在ReferenceConfig.createProxy作为创建代理对象的入口
+
+//dubbo集群模块主要实现了集群容错和负载均衡功能
+//这一调用的入口在RegistryProtocol.doRefer方法中，会去执行cluster.join(directory)
+
+
+
+
 
 
 
